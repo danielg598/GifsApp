@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { GifsService } from '../../../gifs/services/gifs.service';
 
 @Component({
@@ -6,12 +6,19 @@ import { GifsService } from '../../../gifs/services/gifs.service';
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.css']
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
 
   constructor(private gifsService: GifsService){}
 
-  get tags(){
+  ngOnInit(): void {
+    this.gifsService.loadLocalStolrage()
+  }
+
+  get tags():string[]{
     return this.gifsService.tagsHistory
   }
 
+  searchTag(tag:string):void{
+    this.gifsService.searchTag(tag);
+  }
 }

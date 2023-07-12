@@ -1,14 +1,16 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, Inject } from '@angular/core';
+import { Gif, SearchResponse } from '../interfaces/gifs.interfaces';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GifsService {
+  public gifList: Gif[] = [];
 
   private _tagsHistory: string[] = [];
-  private apiKey:       string = 'AIzaSyDxV5h4fg2Tfglmi-aVLKEP869xdNrZUzI';
-  private serviceUrl:   string = 'https://g.tenor.com/v1'
+  private api_Key:       string = 'ubjm3wbBjjx4NDPqaR7X3jIsRULsJYiM';
+  private serviceUrl:   string = 'https://api.giphy.com/v1/gifs/search'
 
   constructor(private http:HttpClient) { }
 
@@ -24,21 +26,32 @@ export class GifsService {
     }
     this._tagsHistory.unshift(tag);
     this._tagsHistory = this._tagsHistory.slice(0,10)
+    this.saveLocalStorage();
+  }
+
+  private saveLocalStorage():void{
+    localStorage.setItem('history', JSON.stringify(this._tagsHistory))
+  }
+
+  public loadLocalStolrage():void{
+    if(!localStorage.getItem('history')) return;
+
+    this._tagsHistory = JSON.parse(localStorage.getItem('history')!) 
   }
 
   searchTag(tag:string):void{
     this.organizeHistory(tag);
 
     const params = new HttpParams()
+    
+    .set('api_key', this.api_Key)
     .set('q' , tag)
-    .set('key', this.apiKey)
-    .set('limit', '15')
-    console.log(params)
+    .set('limit', '10')
 
-    this.http.get(`${this.serviceUrl}/?${params}&client_key=my_test_app`)
+    this.http.get<SearchResponse>( `${this.serviceUrl}?${params}`)
     .subscribe(resp=>{
-      console.log(resp)
+      this.gifList = resp.data;
+      console.log({gifs: this.gifList})
     })
-// 'https://api.unsplash.com/photos/?q=goku&client_id=PVQxLS8DRrHzvcartIzcGLQWGAHWJAZA7NSdxJPxPHA&limit=10'
   }
 }
